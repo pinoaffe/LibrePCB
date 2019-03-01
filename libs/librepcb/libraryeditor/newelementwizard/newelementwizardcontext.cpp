@@ -38,7 +38,7 @@ namespace editor {
  ******************************************************************************/
 
 NewElementWizardContext::NewElementWizardContext(
-    const workspace::Workspace& ws, const Library& lib,
+    const workspace::Workspace& ws, Library& lib,
     const IF_GraphicsLayerProvider& lp, QObject* parent) noexcept
   : QObject(parent),
     mWorkspace(ws),
@@ -112,9 +112,11 @@ void NewElementWizardContext::createLibraryElement() {
                                 mElementAuthor, *mElementName,
                                 mElementDescription, mElementKeywords);
       element.setParentUuid(mElementCategoryUuid);
-      element.saveIntoParentDirectory(
-          mLibrary.getElementsDirectory<ComponentCategory>());
-      mOutputDirectory = element.getFilePath();
+      TransactionalDirectory dir(
+          mLibrary.getDirectory(),
+          mLibrary.getElementsDirectoryName<ComponentCategory>());
+      element.moveIntoParentDirectory(dir);
+      mOutputDirectory = element.getDirectory().getAbsPath();
       break;
     }
     case NewElementWizardContext::ElementType::PackageCategory: {
@@ -122,9 +124,11 @@ void NewElementWizardContext::createLibraryElement() {
                               mElementAuthor, *mElementName,
                               mElementDescription, mElementKeywords);
       element.setParentUuid(mElementCategoryUuid);
-      element.saveIntoParentDirectory(
-          mLibrary.getElementsDirectory<PackageCategory>());
-      mOutputDirectory = element.getFilePath();
+      TransactionalDirectory dir(
+          mLibrary.getDirectory(),
+          mLibrary.getElementsDirectoryName<PackageCategory>());
+      element.moveIntoParentDirectory(dir);
+      mOutputDirectory = element.getDirectory().getAbsPath();
       break;
     }
     case NewElementWizardContext::ElementType::Symbol: {
@@ -135,8 +139,10 @@ void NewElementWizardContext::createLibraryElement() {
       element.getPolygons() = mSymbolPolygons;
       element.getCircles()  = mSymbolCircles;
       element.getTexts()    = mSymbolTexts;
-      element.saveIntoParentDirectory(mLibrary.getElementsDirectory<Symbol>());
-      mOutputDirectory = element.getFilePath();
+      TransactionalDirectory dir(mLibrary.getDirectory(),
+                                 mLibrary.getElementsDirectoryName<Symbol>());
+      element.moveIntoParentDirectory(dir);
+      mOutputDirectory = element.getDirectory().getAbsPath();
       break;
     }
     case NewElementWizardContext::ElementType::Package: {
@@ -149,8 +155,10 @@ void NewElementWizardContext::createLibraryElement() {
         element.getFootprints().append(std::make_shared<Footprint>(
             Uuid::createRandom(), ElementName("default"), ""));
       }
-      element.saveIntoParentDirectory(mLibrary.getElementsDirectory<Package>());
-      mOutputDirectory = element.getFilePath();
+      TransactionalDirectory dir(mLibrary.getDirectory(),
+                                 mLibrary.getElementsDirectoryName<Package>());
+      element.moveIntoParentDirectory(dir);
+      mOutputDirectory = element.getDirectory().getAbsPath();
       break;
     }
     case NewElementWizardContext::ElementType::Component: {
@@ -163,9 +171,11 @@ void NewElementWizardContext::createLibraryElement() {
       element.setPrefixes(mComponentPrefixes);
       element.getSignals()        = mComponentSignals;
       element.getSymbolVariants() = mComponentSymbolVariants;
-      element.saveIntoParentDirectory(
-          mLibrary.getElementsDirectory<Component>());
-      mOutputDirectory = element.getFilePath();
+      TransactionalDirectory dir(
+          mLibrary.getDirectory(),
+          mLibrary.getElementsDirectoryName<Component>());
+      element.moveIntoParentDirectory(dir);
+      mOutputDirectory = element.getDirectory().getAbsPath();
       break;
     }
     case NewElementWizardContext::ElementType::Device: {
@@ -176,8 +186,10 @@ void NewElementWizardContext::createLibraryElement() {
                      *mDeviceComponentUuid, *mDevicePackageUuid);
       element.setCategories(categories);
       element.getPadSignalMap() = mDevicePadSignalMap;
-      element.saveIntoParentDirectory(mLibrary.getElementsDirectory<Device>());
-      mOutputDirectory = element.getFilePath();
+      TransactionalDirectory dir(mLibrary.getDirectory(),
+                                 mLibrary.getElementsDirectoryName<Device>());
+      element.moveIntoParentDirectory(dir);
+      mOutputDirectory = element.getDirectory().getAbsPath();
       break;
     }
     default:
