@@ -53,8 +53,10 @@ CmdFootprintPadEdit::CmdFootprintPadEdit(FootprintPad& pad) noexcept
     mNewPos(mOldPos),
     mOldRotation(pad.getRotation()),
     mNewRotation(mOldRotation),
-    mOldDrillDiameter(pad.getDrillDiameter()),
-    mNewDrillDiameter(mOldDrillDiameter) {
+    mOldDrillWidth(pad.getDrillWidth()),
+    mNewDrillWidth(mOldDrillWidth),
+    mOldDrillHeight(pad.getDrillHeight()),
+    mNewDrillHeight(mOldDrillHeight) {
 }
 
 CmdFootprintPadEdit::~CmdFootprintPadEdit() noexcept {
@@ -106,11 +108,18 @@ void CmdFootprintPadEdit::setHeight(const PositiveLength& height,
   if (immediate) mPad.setHeight(mNewHeight);
 }
 
-void CmdFootprintPadEdit::setDrillDiameter(const UnsignedLength& dia,
+void CmdFootprintPadEdit::setDrillWidth(const PositiveLength& width,
+                                        bool immediate) noexcept {
+  Q_ASSERT(!wasEverExecuted());
+  mNewDrillWidth = width;
+  if (immediate) mPad.setDrillWidth(mNewDrillWidth);
+}
+
+void CmdFootprintPadEdit::setDrillHeight(const PositiveLength& height,
                                            bool immediate) noexcept {
   Q_ASSERT(!wasEverExecuted());
-  mNewDrillDiameter = dia;
-  if (immediate) mPad.setDrillDiameter(mNewDrillDiameter);
+  mNewDrillHeight = height;
+  if (immediate) mPad.setDrillHeight(mNewDrillHeight);
 }
 
 void CmdFootprintPadEdit::setPosition(const Point& pos,
@@ -159,7 +168,8 @@ bool CmdFootprintPadEdit::performExecute() {
   if (mNewHeight != mOldHeight) return true;
   if (mNewPos != mOldPos) return true;
   if (mNewRotation != mOldRotation) return true;
-  if (mNewDrillDiameter != mOldDrillDiameter) return true;
+  if (mNewDrillWidth != mOldDrillWidth) return true;
+  if (mNewDrillHeight != mOldDrillHeight) return true;
   return false;
 }
 
@@ -171,7 +181,8 @@ void CmdFootprintPadEdit::performUndo() {
   mPad.setHeight(mOldHeight);
   mPad.setPosition(mOldPos);
   mPad.setRotation(mOldRotation);
-  mPad.setDrillDiameter(mOldDrillDiameter);
+  mPad.setDrillWidth(mOldDrillWidth);
+  mPad.setDrillHeight(mOldDrillHeight);
 }
 
 void CmdFootprintPadEdit::performRedo() {
@@ -182,7 +193,8 @@ void CmdFootprintPadEdit::performRedo() {
   mPad.setHeight(mNewHeight);
   mPad.setPosition(mNewPos);
   mPad.setRotation(mNewRotation);
-  mPad.setDrillDiameter(mNewDrillDiameter);
+  mPad.setDrillWidth(mNewDrillWidth);
+  mPad.setDrillHeight(mNewDrillHeight);
 }
 
 /*******************************************************************************

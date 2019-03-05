@@ -56,7 +56,8 @@ public:
   void setShape(FootprintPad::Shape shape, bool immediate) noexcept;
   void setWidth(const PositiveLength& width, bool immediate) noexcept;
   void setHeight(const PositiveLength& height, bool immediate) noexcept;
-  void setDrillDiameter(const UnsignedLength& dia, bool immediate) noexcept;
+  void setDrillWidth(const PositiveLength& width, bool immediate) noexcept;
+  void setDrillHeight(const PositiveLength& height, bool immediate) noexcept;
   void setPosition(const Point& pos, bool immediate) noexcept;
   void setDeltaToStartPos(const Point& deltaPos, bool immediate) noexcept;
   void setRotation(const Angle& angle, bool immediate) noexcept;
@@ -97,8 +98,10 @@ private:
   Point                   mNewPos;
   Angle                   mOldRotation;
   Angle                   mNewRotation;
-  UnsignedLength          mOldDrillDiameter;
-  UnsignedLength          mNewDrillDiameter;
+  PositiveLength          mOldDrillWidth;
+  PositiveLength          mNewDrillWidth;
+  PositiveLength          mOldDrillHeight;
+  PositiveLength          mNewDrillHeight;
 };
 
 /*******************************************************************************

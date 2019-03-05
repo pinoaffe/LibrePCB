@@ -17,13 +17,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBREPCB_LIBRARY_PACKAGECHECK_H
-#define LIBREPCB_LIBRARY_PACKAGECHECK_H
+#ifndef LIBREPCB_LIBRARY_MSGMALFORMEDDRILL_H
+#define LIBREPCB_LIBRARY_MSGMALFORMEDDRILL_H
 
 /*******************************************************************************
  *  Includes
  ******************************************************************************/
-#include "libraryelementcheck.h"
+#include "../../msg/libraryelementcheckmessage.h"
 
 #include <QtCore>
 
@@ -33,39 +33,30 @@
 namespace librepcb {
 namespace library {
 
-class Package;
+class FootprintPad;
 
 /*******************************************************************************
- *  Class PackageCheck
+ *  Class MsgDuplicatePadName
  ******************************************************************************/
 
 /**
- * @brief The PackageCheck class
+ * @brief The MsgDuplicatePadName class
  */
-class PackageCheck : public LibraryElementCheck {
+class MsgMalformedDrill final : public LibraryElementCheckMessage {
+  Q_DECLARE_TR_FUNCTIONS(MsgMalformedDrill)
+
 public:
+  enum errorType {
+    WIDER,
+    TALLER
+  };
+
   // Constructors / Destructor
-  PackageCheck()                          = delete;
-  PackageCheck(const PackageCheck& other) = delete;
-  explicit PackageCheck(const Package& package) noexcept;
-  virtual ~PackageCheck() noexcept;
-
-  // General Methods
-  virtual LibraryElementCheckMessageList runChecks() const override;
-
-  // Operator Overloadings
-  PackageCheck& operator=(const PackageCheck& rhs) = delete;
-
-protected:  // Methods
-  void checkDuplicatePadNames(MsgList& msgs) const;
-  void checkMalformedDrills(MsgList& msgs) const;
-  void checkMissingFootprint(MsgList& msgs) const;
-  void checkMissingTexts(MsgList& msgs) const;
-  void checkWrongTextLayers(MsgList& msgs) const;
-  void checkPadsOverlapWithPlacement(MsgList& msgs) const;
-
-private:  // Data
-  const Package& mPackage;
+  MsgMalformedDrill() = delete;
+  explicit MsgMalformedDrill(const FootprintPad& pad, errorType type) noexcept;
+  MsgMalformedDrill(const MsgMalformedDrill& other) noexcept
+    : LibraryElementCheckMessage(other) {}
+  virtual ~MsgMalformedDrill() noexcept;
 };
 
 /*******************************************************************************
@@ -75,4 +66,4 @@ private:  // Data
 }  // namespace library
 }  // namespace librepcb
 
-#endif  // LIBREPCB_LIBRARY_PACKAGECHECK_H
+#endif  // LIBREPCB_LIBRARY_MSGDUPLICATEPADNAME_H

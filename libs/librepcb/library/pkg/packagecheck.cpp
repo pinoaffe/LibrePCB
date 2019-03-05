@@ -28,6 +28,7 @@
 #include "msg/msgmissingfootprintvalue.h"
 #include "msg/msgpadoverlapswithplacement.h"
 #include "msg/msgwrongfootprinttextlayer.h"
+#include "msg/msgmalformeddrill.h"
 #include "package.h"
 
 #include <librepcb/common/graphics/graphicslayer.h>
@@ -59,6 +60,7 @@ PackageCheck::~PackageCheck() noexcept {
 LibraryElementCheckMessageList PackageCheck::runChecks() const {
   LibraryElementCheckMessageList msgs = LibraryElementCheck::runChecks();
   checkDuplicatePadNames(msgs);
+  checkMalformedDrills(msgs);
   checkMissingFootprint(msgs);
   checkMissingTexts(msgs);
   checkWrongTextLayers(msgs);
@@ -77,6 +79,21 @@ void PackageCheck::checkDuplicatePadNames(MsgList& msgs) const {
       msgs.append(std::make_shared<MsgDuplicatePadName>(pad));
     } else {
       padNames.insert(pad.getName());
+    }
+  }
+}
+
+void PackageCheck::checkMalformedDrills(MsgList& msgs) const {
+  for (const Footprint& footprint : mPackage.getFootprints()) {
+    for (const FootprintPad& pad : footprint.getPads()) {
+      if (pad.getBoardSide() == FootprintPad::BoardSide::THT) {
+        if (pad.getDrillWidth() >= pad.getWidth()) {
+          msgs.append(std::make_shared<MsgMalformedDrill>(pad, MsgMalformedDrill::WIDER));
+        }
+        if (pad.getDrillHeight() >= pad.getHeight()) {
+          msgs.append(std::make_shared<MsgMalformedDrill>(pad, MsgMalformedDrill::TALLER));
+        }
+      }
     }
   }
 }

@@ -178,6 +178,26 @@ Point Point::fromPx(const QPointF& pixels) {
   return fromPx(pixels.x(), pixels.y());
 }
 
+Point Point::fromDrillSExpression(const SExpression& node) {
+  Point p;
+  try {
+    const SExpression* drillSize = node.tryGetChildByPath("drill_size");
+    if(drillSize) {
+      p.setX(drillSize->getChildByIndex(0).getValue<Length>());
+      p.setY(drillSize->getChildByIndex(1).getValue<Length>());
+    }
+    else {
+      UnsignedLength ul = node.getValueByPath<UnsignedLength>("drill");
+      p.setX(*((ul > UnsignedLength(0)) ? ul : UnsignedLength(1)));
+      p.setY(*((ul > UnsignedLength(0)) ? ul : UnsignedLength(1)));
+    }
+  } catch (const Exception& e) {
+    throw FileParseError(__FILE__, __LINE__, node.getFilePath(), -1, -1,
+                         QString(), e.getMsg());
+  }
+  return p;
+}
+
 // Non-Member Functions
 
 QDataStream& operator<<(QDataStream& stream, const Point& point) {

@@ -65,6 +65,7 @@ SOURCES += \
     pkg/footprintpadpreviewgraphicsitem.cpp \
     pkg/footprintpreviewgraphicsitem.cpp \
     pkg/msg/msgduplicatepadname.cpp \
+    pkg/msg/msgmalformeddrill.cpp \
     pkg/msg/msgmissingfootprint.cpp \
     pkg/msg/msgmissingfootprintname.cpp \
     pkg/msg/msgmissingfootprintvalue.cpp \

@@ -17,56 +17,37 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBREPCB_LIBRARY_PACKAGECHECK_H
-#define LIBREPCB_LIBRARY_PACKAGECHECK_H
-
 /*******************************************************************************
  *  Includes
  ******************************************************************************/
-#include "libraryelementcheck.h"
+#include "msgmalformeddrill.h"
 
-#include <QtCore>
+#include "../footprintpad.h"
+#include "../footprint.h"
 
 /*******************************************************************************
- *  Namespace / Forward Declarations
+ *  Namespace
  ******************************************************************************/
 namespace librepcb {
 namespace library {
 
-class Package;
-
 /*******************************************************************************
- *  Class PackageCheck
+ *  Constructors / Destructor
  ******************************************************************************/
 
-/**
- * @brief The PackageCheck class
- */
-class PackageCheck : public LibraryElementCheck {
-public:
-  // Constructors / Destructor
-  PackageCheck()                          = delete;
-  PackageCheck(const PackageCheck& other) = delete;
-  explicit PackageCheck(const Package& package) noexcept;
-  virtual ~PackageCheck() noexcept;
+MsgMalformedDrill::MsgMalformedDrill(const FootprintPad& pad, errorType error) noexcept
+  : LibraryElementCheckMessage(
+        Severity::Error,
+        QString(tr("Malformed pad drill: '%1'")).arg(pad.getUuid().toStr()),
+        tr(QString(
+	    "The size of a drill may not exceed the pad size."
+	    "When it does, behaviour is undefined and it may not be plated."
+	    "In this case, the %1 of the drill exceeds the %1 of the pad."
+	).arg((error == WIDER) ? "width" : "height").toStdString().c_str())) {
+}
 
-  // General Methods
-  virtual LibraryElementCheckMessageList runChecks() const override;
-
-  // Operator Overloadings
-  PackageCheck& operator=(const PackageCheck& rhs) = delete;
-
-protected:  // Methods
-  void checkDuplicatePadNames(MsgList& msgs) const;
-  void checkMalformedDrills(MsgList& msgs) const;
-  void checkMissingFootprint(MsgList& msgs) const;
-  void checkMissingTexts(MsgList& msgs) const;
-  void checkWrongTextLayers(MsgList& msgs) const;
-  void checkPadsOverlapWithPlacement(MsgList& msgs) const;
-
-private:  // Data
-  const Package& mPackage;
-};
+MsgMalformedDrill::~MsgMalformedDrill() noexcept {
+}
 
 /*******************************************************************************
  *  End of File
@@ -74,5 +55,3 @@ private:  // Data
 
 }  // namespace library
 }  // namespace librepcb
-
-#endif  // LIBREPCB_LIBRARY_PACKAGECHECK_H

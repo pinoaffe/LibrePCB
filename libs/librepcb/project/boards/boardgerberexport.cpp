@@ -331,8 +331,33 @@ int BoardGerberExport::drawPthDrills(ExcellonGenerator& gen) const {
     foreach (const BI_FootprintPad* pad, footprint.getPads()) {
       const library::FootprintPad& libPad = pad->getLibPad();
       if (libPad.getBoardSide() == library::FootprintPad::BoardSide::THT) {
-        gen.drill(pad->getPosition(),
-                  PositiveLength(*libPad.getDrillDiameter()));  // can throw
+        if (*libPad.getDrillWidth() == *libPad.getDrillHeight()) {
+          gen.drill(pad->getPosition(), libPad.getDrillWidth());
+        }
+        else {
+          if (libPad.getWidth() > libPad.getDrillWidth()
+              and libPad.getHeight() > libPad.getDrillHeight()) {
+            Point start = pad->getPosition();
+            Point end = start;
+
+            Angle rot             = libPad.getRotation();
+            PositiveLength width  = libPad.getDrillWidth();
+            PositiveLength height = libPad.getDrillHeight();
+
+            if (libPad.getDrillWidth() > libPad.getDrillHeight()) {
+              swap(width, height);
+              rot = rot + Angle::deg90();
+            }
+            
+            start.setY(start.getY() - height/2 + width/2);
+            end.setY(start.getY() + height - width);
+
+            start.rotate(rot, pad->getPosition());
+            end.rotate(rot, pad->getPosition());
+
+            gen.slot(start, end, width);
+          }
+        }
         ++count;
       }
     }

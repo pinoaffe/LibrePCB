@@ -94,7 +94,8 @@ private:  // Methods
   void shapeSelectorCurrentShapeChanged(FootprintPad::Shape shape) noexcept;
   void widthSpinBoxValueChanged(double value) noexcept;
   void heightSpinBoxValueChanged(double value) noexcept;
-  void drillDiameterSpinBoxValueChanged(double value) noexcept;
+  void drillWidthSpinBoxValueChanged(double value) noexcept;
+  void drillHeightSpinBoxValueChanged(double value) noexcept;
 
 private:  // Types / Data
   PadType                             mPadType;

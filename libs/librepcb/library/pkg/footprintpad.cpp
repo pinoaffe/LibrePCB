@@ -45,7 +45,8 @@ FootprintPad::FootprintPad(const FootprintPad& other) noexcept
     mShape(other.mShape),
     mWidth(other.mWidth),
     mHeight(other.mHeight),
-    mDrillDiameter(other.mDrillDiameter),
+    mDrillWidth(other.mDrillWidth),
+    mDrillHeight(other.mDrillHeight),
     mBoardSide(other.mBoardSide),
     mRegisteredGraphicsItem(nullptr) {
 }
@@ -54,7 +55,8 @@ FootprintPad::FootprintPad(const Uuid& padUuid, const Point& pos,
                            const Angle& rot, Shape shape,
                            const PositiveLength& width,
                            const PositiveLength& height,
-                           const UnsignedLength& drillDiameter,
+                           const PositiveLength& drillWidth,
+                           const PositiveLength& drillHeight,
                            BoardSide             side) noexcept
   : mPackagePadUuid(padUuid),
     mPosition(pos),
@@ -62,7 +64,8 @@ FootprintPad::FootprintPad(const Uuid& padUuid, const Point& pos,
     mShape(shape),
     mWidth(width),
     mHeight(height),
-    mDrillDiameter(drillDiameter),
+    mDrillWidth(drillWidth),
+    mDrillHeight(drillHeight),
     mBoardSide(side),
     mRegisteredGraphicsItem(nullptr) {
 }
@@ -74,7 +77,8 @@ FootprintPad::FootprintPad(const SExpression& node)
     mShape(node.getValueByPath<Shape>("shape")),
     mWidth(Point(node.getChildByPath("size")).getX()),
     mHeight(Point(node.getChildByPath("size")).getY()),
-    mDrillDiameter(node.getValueByPath<UnsignedLength>("drill")),
+    mDrillWidth(Point::fromDrillSExpression(node).getX()),
+    mDrillHeight(Point::fromDrillSExpression(node).getY()),
     mBoardSide(node.getValueByPath<BoardSide>("side")),
     mRegisteredGraphicsItem(nullptr) {
 }
@@ -134,9 +138,8 @@ QPainterPath FootprintPad::toQPainterPathPx(const Length& expansion) const
     noexcept {
   QPainterPath p = getOutline(expansion).toQPainterPathPx();
   if (mBoardSide == BoardSide::THT) {
-    p.setFillRule(Qt::OddEvenFill);  // important to subtract the hole!
-    p.addEllipse(QPointF(0, 0), mDrillDiameter->toPx() / 2,
-                 mDrillDiameter->toPx() / 2);
+    return p.subtracted(Path::obround(mDrillWidth, mDrillHeight).toQPainterPathPx());
+    // TODO: check whether this is centered correctly
   }
   return p;
 }
@@ -176,8 +179,14 @@ void FootprintPad::setHeight(const PositiveLength& height) noexcept {
     mRegisteredGraphicsItem->setShape(toQPainterPathPx());
 }
 
-void FootprintPad::setDrillDiameter(const UnsignedLength& diameter) noexcept {
-  mDrillDiameter = diameter;
+void FootprintPad::setDrillWidth(const PositiveLength& width) noexcept {
+  mDrillWidth = width;
+  if (mRegisteredGraphicsItem)
+    mRegisteredGraphicsItem->setShape(toQPainterPathPx());
+}
+
+void FootprintPad::setDrillHeight(const PositiveLength& height) noexcept {
+  mDrillHeight = height;
   if (mRegisteredGraphicsItem)
     mRegisteredGraphicsItem->setShape(toQPainterPathPx());
 }
@@ -214,7 +223,9 @@ void FootprintPad::serialize(SExpression& root) const {
   root.appendChild("rotation", mRotation, false);
   root.appendChild(Point(*mWidth, *mHeight).serializeToDomElement("size"),
                    false);
-  root.appendChild("drill", mDrillDiameter, false);
+  root.appendChild(Point(*mDrillWidth,
+                         *mDrillHeight).serializeToDomElement("drill_size"),
+                   false);
 }
 
 /*******************************************************************************
@@ -228,7 +239,8 @@ bool FootprintPad::operator==(const FootprintPad& rhs) const noexcept {
   if (mShape != rhs.mShape) return false;
   if (mWidth != rhs.mWidth) return false;
   if (mHeight != rhs.mHeight) return false;
-  if (mDrillDiameter != rhs.mDrillDiameter) return false;
+  if (mDrillWidth != rhs.mDrillWidth) return false;
+  if (mDrillHeight != rhs.mDrillHeight) return false;
   if (mBoardSide != rhs.mBoardSide) return false;
   return true;
 }
@@ -240,7 +252,8 @@ FootprintPad& FootprintPad::operator=(const FootprintPad& rhs) noexcept {
   mShape          = rhs.mShape;
   mWidth          = rhs.mWidth;
   mHeight         = rhs.mHeight;
-  mDrillDiameter  = rhs.mDrillDiameter;
+  mDrillWidth     = rhs.mDrillWidth;
+  mDrillHeight    = rhs.mDrillHeight;
   mBoardSide      = rhs.mBoardSide;
   return *this;
 }

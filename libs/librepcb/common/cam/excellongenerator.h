@@ -59,6 +59,7 @@ public:
 
   // General Methods
   void drill(const Point& pos, const PositiveLength& dia) noexcept;
+  void slot(const Point& start, const Point& end, const PositiveLength& width) noexcept;
   void generate();
   void saveToFile(const FilePath& filepath) const;
   void reset() noexcept;
@@ -73,8 +74,11 @@ private:
   void printFooter() noexcept;
 
   // Excellon Data
-  QString                  mOutput;
-  QMultiMap<Length, Point> mDrillList;
+  QString                                        mOutput;
+  QMultiMap<PositiveLength, Point>               mDrillList;
+  QMultiMap<PositiveLength, QPair<Point, Point>> mSlotList;
+  QList<PositiveLength>                          mToolList;
+
 };
 
 /*******************************************************************************

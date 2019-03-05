@@ -62,8 +62,8 @@ public:
   FootprintPad(const FootprintPad& other) noexcept;
   FootprintPad(const Uuid& padUuid, const Point& pos, const Angle& rot,
                Shape shape, const PositiveLength& width,
-               const PositiveLength& height,
-               const UnsignedLength& drillDiameter, BoardSide side) noexcept;
+               const PositiveLength& height, const PositiveLength& drillWidth,
+               const PositiveLength& drillHeight, BoardSide side) noexcept;
   explicit FootprintPad(const SExpression& node);
   ~FootprintPad() noexcept;
 
@@ -77,9 +77,8 @@ public:
   Shape        getShape() const noexcept { return mShape; }
   const PositiveLength& getWidth() const noexcept { return mWidth; }
   const PositiveLength& getHeight() const noexcept { return mHeight; }
-  const UnsignedLength& getDrillDiameter() const noexcept {
-    return mDrillDiameter;
-  }
+  const PositiveLength& getDrillWidth() const noexcept { return mDrillWidth; }
+  const PositiveLength& getDrillHeight() const noexcept { return mDrillHeight; }
   BoardSide    getBoardSide() const noexcept { return mBoardSide; }
   QString      getLayerName() const noexcept;
   bool         isOnLayer(const QString& name) const noexcept;
@@ -94,7 +93,8 @@ public:
   void setShape(Shape shape) noexcept;
   void setWidth(const PositiveLength& width) noexcept;
   void setHeight(const PositiveLength& height) noexcept;
-  void setDrillDiameter(const UnsignedLength& diameter) noexcept;
+  void setDrillWidth (const PositiveLength& drillWidth) noexcept;
+  void setDrillHeight (const PositiveLength& drillHeight) noexcept;
   void setBoardSide(BoardSide side) noexcept;
 
   // General Methods
@@ -118,7 +118,8 @@ protected:  // Data
   Shape                     mShape;
   PositiveLength            mWidth;
   PositiveLength            mHeight;
-  UnsignedLength            mDrillDiameter;  // no effect if BoardSide != THT!
+  PositiveLength            mDrillWidth;  //
+  PositiveLength            mDrillHeight; // no effect if BoardSide != THT!
   BoardSide                 mBoardSide;
   FootprintPadGraphicsItem* mRegisteredGraphicsItem;
 };

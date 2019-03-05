@@ -408,6 +408,8 @@ public:
   static Point fromPx(qreal pixelsX, qreal pixelsY);
   static Point fromPx(const QPointF& pixels);
 
+  static Point fromDrillSExpression(const SExpression &node);
+
   // Operators
   Point& operator=(const Point& rhs) {
     mX = rhs.mX;

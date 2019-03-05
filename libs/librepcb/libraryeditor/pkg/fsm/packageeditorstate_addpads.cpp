@@ -57,12 +57,13 @@ PackageEditorState_AddPads::PackageEditorState_AddPads(Context& context,
     mPackagePadComboBox(nullptr),
     mLastPad(Uuid::createRandom(), Point(0, 0), Angle::deg0(),
              FootprintPad::Shape::ROUND, PositiveLength(2540000),
-             PositiveLength(1270000), UnsignedLength(800000),
-             FootprintPad::BoardSide::THT) {
+             PositiveLength(1270000), PositiveLength(800000),
+             PositiveLength(800000), FootprintPad::BoardSide::THT) {
   if (mPadType == PadType::SMT) {
     mLastPad.setBoardSide(FootprintPad::BoardSide::TOP);
     mLastPad.setShape(FootprintPad::Shape::RECT);
-    mLastPad.setDrillDiameter(UnsignedLength(0));
+    mLastPad.setDrillWidth(PositiveLength(1));
+    mLastPad.setDrillHeight(PositiveLength(1));
     mLastPad.setWidth(PositiveLength(1270000));
     mLastPad.setHeight(PositiveLength(635000));
   }
@@ -146,21 +147,35 @@ bool PackageEditorState_AddPads::entry() noexcept {
           this, &PackageEditorState_AddPads::heightSpinBoxValueChanged);
   mContext.commandToolBar.addWidget(std::move(heightSpinBox));
 
-  // drill diameter
+  // drill size
   if (mPadType == PadType::THT) {
-    mContext.commandToolBar.addLabel(tr("Drill Diameter:"), 10);
-    std::unique_ptr<QDoubleSpinBox> drillDiameterSpinBox(new QDoubleSpinBox());
-    drillDiameterSpinBox->setMinimum(0);
-    drillDiameterSpinBox->setMaximum(100);
-    drillDiameterSpinBox->setSingleStep(0.2);
-    drillDiameterSpinBox->setDecimals(6);
-    drillDiameterSpinBox->setValue(mLastPad.getDrillDiameter()->toMm());
-    connect(drillDiameterSpinBox.get(),
+    mContext.commandToolBar.addLabel(tr("Drill Width:"), 10);
+    std::unique_ptr<QDoubleSpinBox> drillWidthSpinBox(new QDoubleSpinBox());
+    drillWidthSpinBox->setMinimum(0);
+    drillWidthSpinBox->setMaximum(100);
+    drillWidthSpinBox->setSingleStep(0.2);
+    drillWidthSpinBox->setDecimals(6);
+    drillWidthSpinBox->setValue(mLastPad.getDrillWidth()->toMm());
+    connect(drillWidthSpinBox.get(),
             static_cast<void (QDoubleSpinBox::*)(double)>(
                 &QDoubleSpinBox::valueChanged),
             this,
-            &PackageEditorState_AddPads::drillDiameterSpinBoxValueChanged);
-    mContext.commandToolBar.addWidget(std::move(drillDiameterSpinBox));
+            &PackageEditorState_AddPads::drillWidthSpinBoxValueChanged);
+    mContext.commandToolBar.addWidget(std::move(drillWidthSpinBox));
+
+    mContext.commandToolBar.addLabel(tr("Drill Height:"), 10);
+    std::unique_ptr<QDoubleSpinBox> drillHeightSpinBox(new QDoubleSpinBox());
+    drillHeightSpinBox->setMinimum(0);
+    drillHeightSpinBox->setMaximum(100);
+    drillHeightSpinBox->setSingleStep(0.2);
+    drillHeightSpinBox->setDecimals(6);
+    drillHeightSpinBox->setValue(mLastPad.getDrillHeight()->toMm());
+    connect(drillHeightSpinBox.get(),
+            static_cast<void (QDoubleSpinBox::*)(double)>(
+                &QDoubleSpinBox::valueChanged),
+            this,
+            &PackageEditorState_AddPads::drillHeightSpinBoxValueChanged);
+    mContext.commandToolBar.addWidget(std::move(drillHeightSpinBox));
   }
 
   Point pos =
@@ -242,7 +257,8 @@ bool PackageEditorState_AddPads::startAddPad(const Point& pos) noexcept {
     mCurrentPad.reset(new FootprintPad(
         mLastPad.getPackagePadUuid(), pos, mLastPad.getRotation(),
         mLastPad.getShape(), mLastPad.getWidth(), mLastPad.getHeight(),
-        mLastPad.getDrillDiameter(), mLastPad.getBoardSide()));
+        mLastPad.getDrillWidth(), mLastPad.getDrillHeight(),
+        mLastPad.getBoardSide()));
     mContext.undoStack.appendToCmdGroup(new CmdFootprintPadInsert(
         mContext.currentFootprint->getPads(), mCurrentPad));
     mEditCmd.reset(new CmdFootprintPadEdit(*mCurrentPad));
@@ -342,13 +358,23 @@ void PackageEditorState_AddPads::heightSpinBoxValueChanged(
   }
 }
 
-void PackageEditorState_AddPads::drillDiameterSpinBoxValueChanged(
+void PackageEditorState_AddPads::drillWidthSpinBoxValueChanged(
     double value) noexcept {
-  Length diameter = Length::fromMm(value);
-  if (diameter < 0) return;
-  mLastPad.setDrillDiameter(UnsignedLength(diameter));
+  Length width = Length::fromMm(value);
+  if (width <= 0) return;
+  mLastPad.setDrillWidth(PositiveLength(width));
   if (mEditCmd) {
-    mEditCmd->setDrillDiameter(mLastPad.getDrillDiameter(), true);
+    mEditCmd->setDrillWidth(mLastPad.getDrillWidth(), true);
+  }
+}
+
+void PackageEditorState_AddPads::drillHeightSpinBoxValueChanged(
+    double value) noexcept {
+  Length height = Length::fromMm(value);
+  if (height <= 0) return;
+  mLastPad.setDrillHeight(PositiveLength(height));
+  if (mEditCmd) {
+    mEditCmd->setDrillHeight(mLastPad.getDrillHeight(), true);
   }
 }
 

@@ -151,7 +151,7 @@ std::unique_ptr<library::Package> PackageConverter::generate() const {
     package->getPads().append(
         std::make_shared<library::PackagePad>(uuid, name));
     Point pos = Point::fromMm(pad.getPosition().x, pad.getPosition().y);
-    UnsignedLength drillDiameter(
+    PositiveLength drillDiameter(
         Length::fromMm(pad.getDrillDiameter()));  // can throw
     UnsignedLength outerDiameter(
         Length::fromMm(pad.getOuterDiameter()));  // can throw
@@ -179,7 +179,7 @@ std::unique_ptr<library::Package> PackageConverter::generate() const {
     }
     Angle rot = Angle::fromDeg(pad.getRotation().getAngle());
     std::shared_ptr<library::FootprintPad> fptPad(new library::FootprintPad(
-        uuid, pos, rot, shape, width, height, drillDiameter,
+        uuid, pos, rot, shape, width, height, drillDiameter, drillDiameter,
         library::FootprintPad::BoardSide::THT));
     footprint->getPads().append(fptPad);
   }
@@ -205,7 +205,7 @@ std::unique_ptr<library::Package> PackageConverter::generate() const {
     PositiveLength height(Length::fromMm(pad.getHeight()));  // can throw
     std::shared_ptr<library::FootprintPad> fptPad(new library::FootprintPad(
         uuid, pos, rot, library::FootprintPad::Shape::RECT, width, height,
-        UnsignedLength(0), side));
+        PositiveLength(1), PositiveLength(1), side));
     footprint->getPads().append(fptPad);
   }
 

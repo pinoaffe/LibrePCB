@@ -93,14 +93,18 @@ FootprintPadPropertiesDialog::FootprintPadPropertiesDialog(
   }
   mUi->spbWidth->setValue(mPad.getWidth()->toMm());
   mUi->spbHeight->setValue(mPad.getHeight()->toMm());
-  mUi->spbDrillDiameter->setValue(mPad.getDrillDiameter()->toMm());
+  mUi->spbDrillWidth->setValue(mPad.getDrillWidth()->toMm());
+  mUi->spbDrillHeight->setValue(mPad.getDrillHeight()->toMm());
   mUi->spbPosX->setValue(mPad.getPosition().getX().toMm());
   mUi->spbPosY->setValue(mPad.getPosition().getY().toMm());
   mUi->spbRotation->setValue(mPad.getRotation().toDeg());
 
-  // disable drill diameter for SMT pads
-  mUi->spbDrillDiameter->setEnabled(mUi->rbtnBoardSideTht->isChecked());
-  connect(mUi->rbtnBoardSideTht, &QRadioButton::toggled, mUi->spbDrillDiameter,
+  // disable drill size for SMT pads
+  mUi->spbDrillWidth->setEnabled(mUi->rbtnBoardSideTht->isChecked());
+  connect(mUi->rbtnBoardSideTht, &QRadioButton::toggled, mUi->spbDrillWidth,
+          &QDoubleSpinBox::setEnabled);
+  mUi->spbDrillHeight->setEnabled(mUi->rbtnBoardSideTht->isChecked());
+  connect(mUi->rbtnBoardSideTht, &QRadioButton::toggled, mUi->spbDrillHeight,
           &QDoubleSpinBox::setEnabled);
 }
 
@@ -159,9 +163,12 @@ bool FootprintPadPropertiesDialog::applyChanges() noexcept {
                   false);  // can throw
     cmd->setHeight(PositiveLength(Length::fromMm(mUi->spbHeight->value())),
                    false);  // can throw
-    cmd->setDrillDiameter(
-        UnsignedLength(Length::fromMm(mUi->spbDrillDiameter->value())),
-        false);  // can throw
+    cmd->setDrillWidth(
+        PositiveLength(
+            Length::fromMm(mUi->spbDrillWidth->value())), false);// can throw
+    cmd->setDrillHeight(
+        PositiveLength(
+            Length::fromMm(mUi->spbDrillHeight->value())), false);// can throw
     cmd->setPosition(
         Point::fromMm(mUi->spbPosX->value(), mUi->spbPosY->value()), false);
     cmd->setRotation(Angle::fromDeg(mUi->spbRotation->value()), false);
